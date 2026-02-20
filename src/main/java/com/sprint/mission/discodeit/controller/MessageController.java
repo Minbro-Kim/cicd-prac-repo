@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -89,7 +88,7 @@ public class MessageController {
     @GetMapping
     public ResponseEntity<List<MessageResponseDto>> findMessagesByChannelId(
             //@RequestHeader UUID userId,//나중에 인증/인가로
-            @PathParam("channelId") UUID channelId)
+            @RequestParam("channelId") UUID channelId)
     {
         return ResponseEntity.status(HttpStatus.OK).body(messageService.findAllByChannelId(channelId));
     }
