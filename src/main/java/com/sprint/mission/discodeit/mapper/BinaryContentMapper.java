@@ -28,7 +28,7 @@ public class BinaryContentMapper {
     }
     public BinaryContentCreateDto toCreateDto(MultipartFile multipartFile) {
         try {
-            return new BinaryContentCreateDto(multipartFile.getName(),
+            return new BinaryContentCreateDto(multipartFile.getOriginalFilename(),
                     multipartFile.getContentType(),
                     multipartFile.getBytes(),
                     multipartFile.getSize());
