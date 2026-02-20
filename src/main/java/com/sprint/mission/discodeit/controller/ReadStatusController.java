@@ -43,7 +43,7 @@ public class ReadStatusController {
     @PatchMapping(path="/{readStatusId}")
     public ResponseEntity<ReadStatus> updateReadStatus(@PathVariable UUID readStatusId,
                                                            @RequestBody ReadStatusUpdateRequest dto){
-        return ResponseEntity.status(HttpStatus.CREATED).body(readStatusService.update(readStatusId,dto));
+        return ResponseEntity.status(HttpStatus.OK).body(readStatusService.update(readStatusId,dto));
     }
 
     @Operation(summary = "User의 Message 읽음 상태 목록 조회",
