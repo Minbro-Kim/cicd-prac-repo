@@ -1,6 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.user.UserLoginDto;
+import com.sprint.mission.discodeit.dto.user.LoginRequest;
 import com.sprint.mission.discodeit.dto.user.UserDto;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
@@ -13,7 +13,7 @@ import com.sprint.mission.discodeit.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.NoSuchElementException;
+import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
@@ -23,11 +23,13 @@ public class BasicAuthService implements AuthService {
     private final UserMapper userMapper;
 
     @Override
-    public UserDto login(UserLoginDto dto){
+    public UserDto login(LoginRequest dto){
         User user = userRepository.findByUsernameAndPassword(dto.username(), dto.password())
                 .orElseThrow(()-> new BusinessLogicException(ExceptionCode.INVALID_CREDENTIALS));
         UserStatus status = userStatusRepository.findByUserId(user.getId())
                 .orElseThrow(()->new BusinessLogicException(ExceptionCode.USER_STATUS_NOT_FOUND));
+        status.update(Instant.now());
+        userStatusRepository.save(status);
         return userMapper.toDto(user, status);
     }
 }

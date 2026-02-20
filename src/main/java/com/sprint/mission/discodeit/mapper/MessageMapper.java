@@ -1,6 +1,6 @@
 package com.sprint.mission.discodeit.mapper;
 
-import com.sprint.mission.discodeit.dto.message.MessageCreateDto;
+import com.sprint.mission.discodeit.dto.message.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.message.MessageResponseDto;
 import com.sprint.mission.discodeit.entity.Message;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ public class MessageMapper {
                 message.getUpdatedAt()
         );
     }
-    public Message toEntity(MessageCreateDto dto, List<UUID> attachmentIds, UUID userId, UUID channelId) {
+    public Message toEntity(MessageCreateRequest dto, List<UUID> attachmentIds, UUID userId, UUID channelId) {
         return new Message(dto.content(),channelId,userId,attachmentIds);
     }
 }

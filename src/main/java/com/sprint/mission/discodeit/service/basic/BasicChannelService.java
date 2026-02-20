@@ -1,9 +1,9 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.channel.ChannelResponseDto;
-import com.sprint.mission.discodeit.dto.channel.ChannelUpdateDto;
-import com.sprint.mission.discodeit.dto.channel.PrivateChannelCreateDto;
-import com.sprint.mission.discodeit.dto.channel.PublicChannelCreateDto;
+import com.sprint.mission.discodeit.dto.channel.ChannelDto;
+import com.sprint.mission.discodeit.dto.channel.PublicChannelUpdateRequest;
+import com.sprint.mission.discodeit.dto.channel.PrivateChannelCreateRequest;
+import com.sprint.mission.discodeit.dto.channel.PublicChannelCreateRequest;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.Message;
@@ -31,7 +31,7 @@ public class BasicChannelService implements ChannelService {
     private final ChannelMapper channelMapper;
 
     @Override
-    public ChannelResponseDto create(PublicChannelCreateDto dto) {
+    public ChannelDto create(PublicChannelCreateRequest dto) {
         Channel channel = channelMapper.toEntity(dto);
         channelRepository.save(channel);
         //모든 사용자가 멤버!
@@ -41,7 +41,7 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public ChannelResponseDto create(PrivateChannelCreateDto dto) {
+    public ChannelDto create(PrivateChannelCreateRequest dto) {
         Channel channel = channelMapper.toEntity(dto);
         channelRepository.save(channel);
         dto.memberIds()
@@ -50,14 +50,14 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public ChannelResponseDto find(UUID channelId) {
+    public ChannelDto find(UUID channelId) {
         Channel channel = get(channelId);
         return channelToDto(channel);
     }
 
     @Override
-    public List<ChannelResponseDto> findAllByUserId(UUID userId) {
-        List<ChannelResponseDto> response = new ArrayList<>();
+    public List<ChannelDto> findAllByUserId(UUID userId) {
+        List<ChannelDto> response = new ArrayList<>();
         /*
             사용자가 속한 채널 = 비공개+공개
          */
@@ -71,7 +71,7 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public ChannelResponseDto update(UUID id,ChannelUpdateDto dto) {
+    public ChannelDto update(UUID id, PublicChannelUpdateRequest dto) {
         Channel channel = get(id);
         if(channel.getType()==ChannelType.PRIVATE){
             throw new BusinessLogicException(ExceptionCode.NOT_ALLOWED_IN_PRIVATE_CHANNEL);
@@ -90,7 +90,7 @@ public class BasicChannelService implements ChannelService {
         readStatusRepository.deleteByChannelId(channelId);
     }
 
-    private ChannelResponseDto channelToDto(Channel channel) {
+    private ChannelDto channelToDto(Channel channel) {
         Message lastMessage = messageRepository.findLastMessageByChannelId(channel.getId())
                 .orElse(null);//아직 메세지가 생성 안된경우
         List<UUID> memberIds = new ArrayList<>();

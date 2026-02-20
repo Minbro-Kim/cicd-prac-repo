@@ -1,7 +1,7 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.readstatus.ReadStatusCreateDto;
-import com.sprint.mission.discodeit.dto.readstatus.ReadStatusUpdateDto;
+import com.sprint.mission.discodeit.dto.readstatus.ReadStatusCreateRequest;
+import com.sprint.mission.discodeit.dto.readstatus.ReadStatusUpdateRequest;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.exception.BusinessLogicException;
 import com.sprint.mission.discodeit.exception.ExceptionCode;
@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 @Service
 @RequiredArgsConstructor
@@ -23,9 +22,9 @@ public class BasicReadStatusService implements ReadStatusService {
     private final ChannelRepository channelRepository;
 
     @Override
-    public ReadStatus create(ReadStatusCreateDto dto) {
+    public ReadStatus create(ReadStatusCreateRequest dto) {
         checkValidation(dto.userId(),dto.channelId());
-        return readStatusRepository.save(new ReadStatus(dto.userId(),dto.channelId()));
+        return readStatusRepository.save(new ReadStatus(dto.userId(),dto.channelId(),dto.lastReadAt()));
     }
 
     @Override
@@ -40,9 +39,9 @@ public class BasicReadStatusService implements ReadStatusService {
     }
 
     @Override
-    public ReadStatus update(UUID id,ReadStatusUpdateDto dto) {
+    public ReadStatus update(UUID id, ReadStatusUpdateRequest dto) {
         ReadStatus status = find(id);
-        status.update();//마지막 시간 현재로 업데이트
+        status.update(dto.lastReadAt());//마지막 시간 현재로 업데이트
         return readStatusRepository.save(status);
     }
 

@@ -1,9 +1,9 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.binarycontent.BinaryContentCreateDto;
-import com.sprint.mission.discodeit.dto.user.UserCreateDto;
+import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
 import com.sprint.mission.discodeit.dto.user.UserDto;
-import com.sprint.mission.discodeit.dto.user.UserUpdateDto;
+import com.sprint.mission.discodeit.dto.user.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
@@ -32,7 +32,7 @@ public class BasicUserService implements UserService {
     private final BinaryContentMapper binaryContentMapper;
 
     @Override
-    public UserDto create(UserCreateDto dto, Optional<BinaryContentCreateDto> binaryContentCreateDto) {
+    public UserDto create(UserCreateRequest dto, Optional<BinaryContentCreateDto> binaryContentCreateDto) {
         validateEmail(dto.email());
         validateUsername(dto.username());
         //프로필 사진
@@ -65,7 +65,7 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public UserDto update(UUID userId, UserUpdateDto dto, Optional<BinaryContentCreateDto> binaryContentCreateDto) {
+    public UserDto update(UUID userId, UserUpdateRequest dto, Optional<BinaryContentCreateDto> binaryContentCreateDto) {
         User user = get(userId);
         BinaryContent profile = null;
         UUID oldProfileId = null;

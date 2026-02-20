@@ -34,7 +34,7 @@ public class BasicUserStatusService implements UserStatusService {
     @Override
     public UserStatus update(UUID id, UserStatusUpdateDto dto) {
         UserStatus status = find(id);
-        status.update();
+        status.update(dto.lastActiveAt());
         return userStatusRepository.save(status);
     }
 
@@ -44,7 +44,7 @@ public class BasicUserStatusService implements UserStatusService {
                 .orElseThrow(()->new BusinessLogicException(ExceptionCode.USER_NOT_FOUND));
         UserStatus status = userStatusRepository.findByUserId(userId)
                 .orElseThrow(()->new BusinessLogicException(ExceptionCode.USER_STATUS_NOT_FOUND));
-        status.update();
+        status.update(dto.lastActiveAt());
         return userStatusRepository.save(status);
     }
 

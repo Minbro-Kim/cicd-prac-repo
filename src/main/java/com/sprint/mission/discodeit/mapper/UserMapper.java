@@ -1,6 +1,6 @@
 package com.sprint.mission.discodeit.mapper;
 
-import com.sprint.mission.discodeit.dto.user.UserCreateDto;
+import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
 import com.sprint.mission.discodeit.dto.user.UserDto;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
@@ -22,7 +22,7 @@ public class UserMapper {
         );
     }
 
-    public User toEntity(UserCreateDto dto, BinaryContent profile) {
+    public User toEntity(UserCreateRequest dto, BinaryContent profile) {
         return new User(
                 dto.username(),
                 dto.email(),

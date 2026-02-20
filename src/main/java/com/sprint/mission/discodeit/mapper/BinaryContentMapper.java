@@ -22,14 +22,16 @@ public class BinaryContentMapper {
         return new BinaryContent(
                 dto.fileName(),
                 dto.contentType(),
-                dto.bytes()
+                dto.bytes(),
+                dto.size()
         );
     }
     public BinaryContentCreateDto toCreateDto(MultipartFile multipartFile) {
         try {
             return new BinaryContentCreateDto(multipartFile.getName(),
                     multipartFile.getContentType(),
-                    multipartFile.getBytes());
+                    multipartFile.getBytes(),
+                    multipartFile.getSize());
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
         }

@@ -1,8 +1,8 @@
 package com.sprint.mission.discodeit.mapper;
 
-import com.sprint.mission.discodeit.dto.channel.ChannelResponseDto;
-import com.sprint.mission.discodeit.dto.channel.PrivateChannelCreateDto;
-import com.sprint.mission.discodeit.dto.channel.PublicChannelCreateDto;
+import com.sprint.mission.discodeit.dto.channel.ChannelDto;
+import com.sprint.mission.discodeit.dto.channel.PrivateChannelCreateRequest;
+import com.sprint.mission.discodeit.dto.channel.PublicChannelCreateRequest;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.Message;
@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.UUID;
 @Component
 public class ChannelMapper {
-    public ChannelResponseDto toDto(Channel channel, Message lastMessage, List<UUID> memberIds) {
-        return new ChannelResponseDto(channel.getId(),channel.getType(), channel.getName(),
+    public ChannelDto toDto(Channel channel, Message lastMessage, List<UUID> memberIds) {
+        return new ChannelDto(channel.getId(),channel.getType(), channel.getName(),
                 channel.getDescription(),
                 channel.getCreatedAt(),
                 channel.getUpdatedAt(),
@@ -22,11 +22,11 @@ public class ChannelMapper {
         );
     }
 
-    public Channel toEntity(PublicChannelCreateDto dto){
+    public Channel toEntity(PublicChannelCreateRequest dto){
         return new Channel(ChannelType.PUBLIC, dto.name(), dto.description());
     }
 
-    public Channel toEntity(PrivateChannelCreateDto dto){
+    public Channel toEntity(PrivateChannelCreateRequest dto){
         return new Channel(ChannelType.PRIVATE, null, null);
     }
 }

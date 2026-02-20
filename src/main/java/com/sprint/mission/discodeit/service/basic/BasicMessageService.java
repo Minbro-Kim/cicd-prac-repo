@@ -1,9 +1,9 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.binarycontent.BinaryContentCreateDto;
-import com.sprint.mission.discodeit.dto.message.MessageCreateDto;
+import com.sprint.mission.discodeit.dto.message.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.message.MessageResponseDto;
-import com.sprint.mission.discodeit.dto.message.MessageUpdateDto;
+import com.sprint.mission.discodeit.dto.message.MessageUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.exception.BusinessLogicException;
@@ -31,7 +31,7 @@ public class BasicMessageService implements MessageService {
     private final ReadStatusRepository readStatusRepository;
 
     @Override
-    public MessageResponseDto create(UUID channelId, UUID authorId, MessageCreateDto dto, List<BinaryContentCreateDto> binaryContentCreateDtos) {
+    public MessageResponseDto create(UUID channelId, UUID authorId, MessageCreateRequest dto, List<BinaryContentCreateDto> binaryContentCreateDtos) {
         checkMember(channelId, authorId);
         checkValidate(dto, binaryContentCreateDtos);
         List<UUID> attachmentIds = new ArrayList<>();
@@ -51,8 +51,8 @@ public class BasicMessageService implements MessageService {
     }
 
     @Override
-    public List<MessageResponseDto> findAllByChannelId(UUID userId, UUID channelId) {
-        checkMember(channelId, userId);
+    public List<MessageResponseDto> findAllByChannelId(UUID channelId) {
+        //checkMember(channelId, userId);//인증 인가 도입하고 실행
         List<MessageResponseDto> response = new ArrayList<>();
         messageRepository.findAllByChannelId(channelId)
                 .forEach(message -> response.add(messageMapper.toDto(message)));
@@ -60,26 +60,28 @@ public class BasicMessageService implements MessageService {
     }
 
     @Override
-    public MessageResponseDto update(UUID id,UUID userId, MessageUpdateDto dto) {
+    public MessageResponseDto update(UUID id, MessageUpdateRequest dto) {
         Message message = get(id);
-        checkMember(message.getChannelId(), userId);
-        checkAuthor(message.getAuthorId(), userId);
-        message.update(dto.content(),null);//첨부파일 변경을 하려면 별도로 메서드 필요
+        //인증인가 구현후 아래 유효성 검증 도입
+        //checkMember(message.getChannelId(), userId);
+        //checkAuthor(message.getAuthorId(), userId);
+        message.update(dto.newContent(),null);//첨부파일 변경을 하려면 별도로 메서드 필요
         return messageMapper.toDto(messageRepository.save(message));
     }
 
     @Override
-    public void delete(UUID messageId, UUID userId) {
+    public void delete(UUID messageId) {
         Message message = get(messageId);
-        checkMember(message.getChannelId(), userId);
-        checkAuthor(message.getAuthorId(), userId);
+        // 아래 유효성 검증은 인증/인가 추가후
+        //checkMember(message.getChannelId(), userId);
+        //checkAuthor(message.getAuthorId(), userId);
         if(message.getAttachmentIds()!=null && !message.getAttachmentIds().isEmpty()){
             message.getAttachmentIds().forEach(binaryContentRepository::delete);//첨부파일 있는경우만 지우기
         }
         messageRepository.deleteById(messageId);
 
     }
-    private void checkValidate(MessageCreateDto dto,List<BinaryContentCreateDto> binaryContentCreateDtos) {
+    private void checkValidate(MessageCreateRequest dto, List<BinaryContentCreateDto> binaryContentCreateDtos) {
         if((dto.content()==null || dto.content().isEmpty()) //컨텐츠와 첨부파일 두개다 없는 경우
                 && (binaryContentCreateDtos==null || binaryContentCreateDtos.isEmpty()) ){
             throw new BusinessLogicException(ExceptionCode.INVALID_MESSAGE);
