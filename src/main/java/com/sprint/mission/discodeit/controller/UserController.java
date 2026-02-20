@@ -6,12 +6,17 @@ import com.sprint.mission.discodeit.dto.user.UserDto;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequest;
 import com.sprint.mission.discodeit.dto.userstatus.UserStatusUpdateDto;
 import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.exception.ErrorResponse;
 import com.sprint.mission.discodeit.mapper.BinaryContentMapper;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.UserStatusService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -43,10 +48,58 @@ public class UserController {
     private final BinaryContentMapper binaryContentMapper;
 
     @Operation(summary = "User 등록")
-    @ApiResponse(responseCode = "201", description = "User가 성공적으로 생성됨")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "User가 성공적으로 생성됨"),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "같은 email 또는 username를 사용하는 User가 이미 존재함",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "fieldErrors": null,
+                                      "violationErrors": null,
+                                      "code": 409,
+                                      "message": "이미 존재하는 사용자이름"
+                                    }
+                                """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "잘못된 요청",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                          "fieldErrors": [
+                                            {
+                                              "field": "email",
+                                              "rejectedValue": "user",
+                                              "message": "이메일 형식이 올바르지 않습니다."
+                                            },
+                                            {
+                                              "field": "username",
+                                              "rejectedValue": "",
+                                              "message": "사용자 이름을 입력해주세요."
+                                            }
+                                          ],
+                                          "violationErrors": null,
+                                          "code": null,
+                                          "message": null
+                                        }
+                                """)
+                    )
+            )
+    })
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<UserDto> create(@Valid @RequestPart(value = "userCreateRequest") UserCreateRequest dto,
-                                                @RequestPart(value = "profile",required = false) MultipartFile multipartFile) {
+    public ResponseEntity<UserDto> create(
+            @Parameter(content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+            @Valid @RequestPart(value = "userCreateRequest") UserCreateRequest dto,
+            @Parameter(description = "User 프로필 이미지")
+            @RequestPart(value = "profile",required = false) MultipartFile multipartFile) {
         BinaryContentCreateDto binaryContentCreateDto = null;
         if(multipartFile != null && !multipartFile.isEmpty()){
             binaryContentCreateDto = binaryContentMapper.toCreateDto(multipartFile);
@@ -57,9 +110,44 @@ public class UserController {
     @Operation(summary = "User 정보 수정", operationId = "update",
             parameters = @Parameter(name = "userId",description = "수정할 User ID")
             )
-    @ApiResponse(responseCode = "200",description = "User 정보가 성공적으로 수정됨")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",description = "User 정보가 성공적으로 수정됨"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User를 찾을 수 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "fieldErrors": null,
+                                      "violationErrors": null,
+                                      "code": 409,
+                                      "message": "존재하지 않는 사용자"
+                                    }
+                                """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "같은 email 또는 username를 사용하는 User가 이미 존재함",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "fieldErrors": null,
+                                      "violationErrors": null,
+                                      "code": 409,
+                                      "message": "이미 존재하는 사용자이름"
+                                    }
+                                """)
+                    )
+            )
+    })
     @PatchMapping(path = "/{userId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<UserDto> updateUser(@PathVariable UUID userId, @Valid @RequestPart("userUpdateRequest") UserUpdateRequest dto,
+                                              @Parameter(description = "수정할 User 프로필 이미지")
                                               @RequestPart(value = "profile",required = false) MultipartFile multipartFile) {
         BinaryContentCreateDto binaryContentCreateDto = null;
         if(multipartFile != null && !multipartFile.isEmpty()){
@@ -72,6 +160,25 @@ public class UserController {
             summary = "User 삭제",
             operationId = "delete",
             parameters = @Parameter(name ="userId",description = "삭제할 User ID",required = true))
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "User가 성공적으로 삭제됨"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User를 찾을 수 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "fieldErrors": null,
+                                      "violationErrors": null,
+                                      "code": 404,
+                                      "message": "존재하지 않는 사용자"
+                                    }
+                                """)
+                    )
+            )
+    })
     @ApiResponse(responseCode = "204", description = "User가 성공적으로 삭제됨")
     @DeleteMapping("/{userId}")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID userId) {
@@ -87,7 +194,25 @@ public class UserController {
 
     @Operation(summary = "User 온라인 상태 업데이트", operationId = "updateUserStatusByUserId",
                 parameters = @Parameter(name = "userId", description = "상태를 변경할 User ID",required = true))
-    @ApiResponse(responseCode = "200",description = "User 온라인 상태가 성공적으로 업데이트됨")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",description = "User 온라인 상태가 성공적으로 업데이트됨"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "해당 User의 UserStatus를 찾을 수 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "fieldErrors": null,
+                                      "violationErrors": null,
+                                      "code": 404,
+                                      "message": "존재하지 않는 바이너리 컨텐츠"
+                                    }
+                                """)
+                    )
+            )
+    })
     @PatchMapping(path="/{userId}/userStatus")
     public ResponseEntity<UserStatus> updateUserStatus(@PathVariable UUID userId, @Valid @RequestBody UserStatusUpdateDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(userStatusService.updateByUserId(userId,dto));

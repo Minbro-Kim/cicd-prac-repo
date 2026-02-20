@@ -4,10 +4,15 @@ import com.sprint.mission.discodeit.dto.channel.ChannelDto;
 import com.sprint.mission.discodeit.dto.channel.PublicChannelUpdateRequest;
 import com.sprint.mission.discodeit.dto.channel.PrivateChannelCreateRequest;
 import com.sprint.mission.discodeit.dto.channel.PublicChannelCreateRequest;
+import com.sprint.mission.discodeit.exception.ErrorResponse;
 import com.sprint.mission.discodeit.service.ChannelService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -49,8 +54,41 @@ public class ChannelController {
 
     @Operation(summary = "Channel 정보 수정", operationId = "update_3",
             parameters = @Parameter(name = "channelId", description = "수정할 Channel ID"))
-    @ApiResponse(responseCode = "200", description = "Channel 정보가 성공적으로 수정됨")
-
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Channel 정보가 성공적으로 수정됨"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Channel을 찾을 수 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "fieldErrors": null,
+                                      "violationErrors": null,
+                                      "code": 404,
+                                      "message": "존재하지 않는 채널"
+                                    }
+                                """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Private Channel은 수정할 수 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "fieldErrors": null,
+                                      "violationErrors": null,
+                                      "code": 403,
+                                      "message": "비공개 채널에 허용되지 않은 기능"
+                                    }
+                                """)
+                    )
+            )
+    })
     @PatchMapping("/{channelId}")//나중에 소유자가 정해진다면, 권한확인필요
     public ResponseEntity<ChannelDto> updatePublicChannel(@PathVariable UUID channelId, @RequestBody PublicChannelUpdateRequest dto) {
         return ResponseEntity.status(HttpStatus.OK).body(channelService.update(channelId,dto));
@@ -58,7 +96,25 @@ public class ChannelController {
 
     @Operation(summary = "Channel 삭제", operationId = "delete_2",
                 parameters = @Parameter(name = "channelId", description = "삭제할 Channel ID"))
-    @ApiResponse(responseCode = "204", description = "Channel이 성공적으로 삭제됨")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Channel이 성공적으로 삭제됨"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Channel을 찾을 수 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "fieldErrors": null,
+                                      "violationErrors": null,
+                                      "code": 404,
+                                      "message": "존재하지 않는 채널"
+                                    }
+                                """)
+                    )
+            )
+    })
     @DeleteMapping("/{channelId}") //나중에 소유자가 정해진다면, 권한확인필요
     public ResponseEntity<Void> deleteChannel(@PathVariable UUID channelId) {
         channelService.delete(channelId);

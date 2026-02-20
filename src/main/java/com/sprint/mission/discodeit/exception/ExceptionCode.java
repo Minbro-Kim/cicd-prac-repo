@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum ExceptionCode {
     //AUTH
-    INVALID_CREDENTIALS(404, "INVALID_CREDENTIALS","잘못된 아이디 또는 비밀번호"),
+    INVALID_CREDENTIALS(400, "INVALID_CREDENTIALS","잘못된 아이디 또는 비밀번호"),
     //USER
     USER_NOT_FOUND(404,"USER_NOT_FOUND", "존재하지 않는 사용자"),
     EMAIL_ALREADY_EXIST(409, "EMAIL_ALREADY_EXIST","이미 존재하는 이메일"),
@@ -30,11 +30,11 @@ public enum ExceptionCode {
 
     ;
 
-    private final int status;
-    private final String code;
+    private final int code;
+    private final String status;
     private final String message;
 
-    ExceptionCode(int status, String code, String message) {
+    ExceptionCode(int code, String status, String message) {
         this.status = status;
         this.code = code;
         this.message = message;
