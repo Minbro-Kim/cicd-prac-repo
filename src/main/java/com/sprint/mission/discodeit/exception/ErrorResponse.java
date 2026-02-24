@@ -54,7 +54,7 @@ public class ErrorResponse {
       this.message = message;
     }
 
-    public static List<FieldError> of(BindingResult bindingResult) {
+    private static List<FieldError> of(BindingResult bindingResult) {
       return bindingResult.getFieldErrors().stream()
           .map(e -> new FieldError(
               e.getField(),
