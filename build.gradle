@@ -47,7 +47,41 @@ jacocoTestReport {
 		xml.required = true
 		html.required = true
 	}
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					"**/jcf/**",               // 사용하지 않는 jcf 폴더 제외
+					"**/FileStorage.class",
+					"**/BaseEntity.class"
+			])
+		}))
+	}
 }
+// build.gradle에 추가
+jacocoTestCoverageVerification {
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					"**/jcf/**",
+					"**/FileStorage.class",
+					"**/BaseEntity.class"
+			])
+		}))
+	}
+	violationRules {
+		rule {
+			element = 'BUNDLE' //'CLASS'
+			limit {
+				counter = 'LINE'
+				value = 'COVEREDRATIO'
+				minimum = 0.7
+			}
+		}
+	}
+}
+
+// 빌드 시 coverage 체크를 강제
+check.dependsOn jacocoTestCoverageVerification
 test {
 	useJUnitPlatform()
 	finalizedBy jacocoTestReport

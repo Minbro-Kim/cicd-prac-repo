@@ -8,7 +8,7 @@ pipeline {
         stage('1. Build & Test'){
             steps {
                 sh 'chmod +x gradlew'
-                sh './gradlew clean build'
+                sh './gradlew clean check'
             }
         }
         stage('2. Docker Build'){
@@ -27,7 +27,13 @@ pipeline {
     }
     post {
         always {
-            jacoco()
+            script {
+                if (fileExists('build/reports/jacoco/test/jacocoTestReport.xml')) {
+                    jacoco()
+                } else {
+                    echo "JaCoCo report not found, skipping report generation."
+                }
+            }
         }
     }
 }
