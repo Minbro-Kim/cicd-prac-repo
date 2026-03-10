@@ -8,7 +8,7 @@ pipeline {
         stage('1. Build & Test'){
             steps {
                 sh 'chmod +x gradlew'
-                sh './gradlew clean check'
+                sh './gradlew clean build'
             }
         }
         stage('2. Docker Build'){
